@@ -12,6 +12,13 @@ def generate_yaml(data):
     """Generate a yaml formatted string from a nested dictionary."""
     return yaml.dump(data, allow_unicode=True, default_flow_style=False)
 
+def safe_int_conversion(value):
+    """Try converting a value to an integer. If fails, return original value."""
+    try:
+        return int(value)
+    except ValueError:
+        return value
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     global yaml_data
@@ -25,10 +32,11 @@ def index():
         
         last_section = ""
         
-        new_values = request.form.getlist("new_value")
-
         section_data = {}
         for section, key, value, new_value in zip(sections, keys, values, new_values):
+            section = safe_int_conversion(section)  # Convert section name to int if possible
+            key = safe_int_conversion(key)
+            value = safe_int_conversion(value)
 
             if not section:
                 section = last_section
@@ -42,18 +50,17 @@ def index():
 
         for section, items in section_data.items():
             sorted_items = sorted(items, key=lambda x: x[2])
-            yaml_data[section] = {item[0]: {"value": item[1], "new_value": item[2]} for item in items}
+            yaml_data[section] = {item[0]: item[1] for item in sorted_items}
 
-        sorted_sections = sorted(yaml_data.items(), key=lambda x: list(x[1].values())[0]['new_value'])
+        sorted_sections = sorted(yaml_data.items(), key=lambda x: section_data[x[0]][0][2])
         yaml_data = dict(sorted_sections)
 
         session['generated_yaml'] = generate_yaml(yaml_data)
-        
         filename = request.form["filename"] + ".yml"
         session['filename'] = filename
-        
+
         return redirect(url_for("download"))
-    
+
     return render_template('template_with_delete.html')
 
 @app.route("/download", methods=["GET"])
