@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YAML Generator</title>
+<style>
+        /* Added general styles for a softer look */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2% 5%;
+            background-color: #f6f8fa;
+        }
+        
+        button, input[type="submit"] {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        
+        button:hover, input[type="submit"]:hover {
+            transform: scale(1.05);
+        }
+        
+        button:active, input[type="submit"]:active {
+            transform: scale(1);
+        }
+        
+        /* Specific styles for the delete button and the + button */
+        .input-row button.delete-row {
+            background-color: #FF4C4C;
+            margin-left: 10px;
+        }
+        
+        .input-row button.delete-row:hover {
+            background-color: #FF1F1F;
+        }
+        
+        #add-row {
+            background-color: #28a745;
+            color: white;
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+        }
+    
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .input-row input {
+            width: 30%;
+        }
+        .input-row button {
+            background-color: red;
+            color: white;
+        }
+        #filename-input {
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            margin-bottom: 0;
+        }
+        p {
+            margin-top: 0;
+        }
+    
+style>
+    #swap-values {
+        width: 25px;
+        height: 25px;
+        border-radius: 25px;  /* Makes the button rounded */
+        margin-right: 25px;   /* Add some margin for spacing */
+        color: white;
+        cursor: pointer;
+    }
+
+    /* ボタンのサイズ調整 */
+    #filename-input button {
+        border: none; /* ボーダーを削除 */
+        padding: 0;  /* パディングを削除 */
+        display: inline-block;
+        vertical-align: middle; /* 画像とボタンの縦の位置を中央揃え */
+    }
+
+    /* 画像のサイズ調整 */
+    #filename-input img {
+        display: block;
+        width: 100%;  /* 画像の幅をボタンの幅に合わせる */
+        height: auto; /* 画像の高さをアスペクト比に合わせて自動調整 */
+    }
+    
+</style>
+<style>
+    input[type="text"] {
+        height: 40px;  /* Assuming the height of the button is 40px, this can be adjusted */
+        vertical-align: middle;
+    }
+</style><style>
+    .input-row {
+        justify-content: flex-start;
+    }
+    .input-row input {
+        margin-right: 10px;  /* Adding some margin to space out the input boxes */
+    }
+</style><style>
+    input[name="filename"] {
+        font-size: 5px;  /* Adjust the font size of the text inside the filename input box only */
+    }
+</style><style>
+    label[for="filename"] {
+        font-size: 22px;  /* Adjust the font size of the label "ファイル名:" */
+    }
+    input[name="filename"] {
+        font-size: 16px;  /* Adjust the font size of the text inside the filename input box */
+    }
+</style></head>
+<body>
+<h1>YAMLファイル作成補助ツール</h1>
+<form aid="yaml-form" autocomplete="off" method="post">
+<div id="filename-input" style="display: flex; align-items: center; gap: 10px;">
+<label for="filename">ファイル名:</label>
+<input name="filename" type="text"/>
+<button id="refresh-button" style="height: 25px;" type="button">
+<img alt="入れ替えボタン" src="{{ url_for('static', filename='img/refresh.png') }}" style="height: 25px; "/>
+</button>
+</div>
+<h3>注意事項</h3>
+<p>・本ツールはstable diffusionの拡張機能に使用されるYAMLファイルの作成補助をします<br/>・主にEasy prompt selectorでの使用を想定しています<br/>・prompt all in oneの場合はファイル名の横にあるボタンで単語とプロンプトを総入れ替えしてから保存してください</p>
+<h3>使い方</h3>
+<p>・カテゴリの部分が空白の場合、一行上のカテゴリと同じとみなされます<br/>・+ボタンで列の追加が可能です<br/>・『YAMLファイルを作成』で自動的に.ymlファイルに変換したものがダウンロードされます</p>
+<div id="input-container">
+<!-- Initial input row -->
+<div class="input-row">
+<input name="section" placeholder="カテゴリ" required="" type="text"/>
+<input name="key" placeholder="単語" required="" type="text"/>
+<input name="value" placeholder="プロンプト" required="" type="text"/>
+<button class="delete-row" type="button">削除</button>
+</div>
+</div>
+<div style="text-align: right;">
+<button id="add-row" type="button">+</button>
+</div>
+<div style="text-align: right;">
+<input style="background-color: #007BFF; color: white;" type="submit" value="YAMLファイルを作成"/>
+</div>
+<script>
+        // Add new input row when '+' button is clicked
+        document.getElementById('add-row').addEventListener('click', function() {
+            const newRow = document.createElement('div');
+            newRow.className = 'input-row';
+            newRow.innerHTML = `
+                <input type="text" name="section" placeholder="カテゴリ" >
+                <input type="text" name="key" placeholder="単語" required >
+                <input type="text" name="value" placeholder="プロンプト" required>
+                <button type="button" class="delete-row">削除</button>
+            `;
+            
+    document.getElementById('input-container').appendChild(newRow);
+    window.scrollTo(0,document.body.scrollHeight);
+    
+            
+            // Attach event listener to the delete button of the new row
+            newRow.querySelector('.delete-row').addEventListener('click', function() {
+                newRow.remove();
+            });
+        });
+        
+        // Attach event listeners to the delete buttons of existing rows
+        const deleteButtons = document.querySelectorAll('.delete-row');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                button.closest('.input-row').remove();
+            });
+        });
+    
+        // Swap values of key and value inputs when the "swap-values" button is clicked
+
+        // Logic to handle the new value
+        function updateNewValues() {
+            const rows = document.querySelectorAll('.input-row');
+            rows.forEach((row, index) => {
+                let newValueInput = row.querySelector('input[name="new_value"]');
+                if (!newValueInput) {
+                    newValueInput = document.createElement('input');
+                    newValueInput.type = 'text';
+                    newValueInput.name = 'new_value';
+                    newValueInput.readOnly = true;
+                    newValueInput.style.width = '5%';
+                    newValueInput.style.marginLeft = '5px';
+                    row.appendChild(newValueInput);
+                }
+                newValueInput.value = index + 1;
+            });
+        }
+        
+        // Call the update function initially to handle the default row
+        updateNewValues();
+        
+        // Update the new values whenever a new row is added or a row is deleted
+        document.getElementById('add-row').addEventListener('click', updateNewValues);
+
+        document.getElementById('swap-values').addEventListener('click', function() {
+            const rows = document.querySelectorAll('.input-row');
+            rows.forEach(row => {
+                const keyInput = row.querySelector('input[name="key"]');
+                const valueInput = row.querySelector('input[name="value"]');
+                const temp = keyInput.value;
+                keyInput.value = valueInput.value;
+                valueInput.value = temp;
+            });
+        });
+</script>
+</form><script>
+document.getElementById('refresh-button').addEventListener('click', function() {
+    const rows = document.querySelectorAll('.input-row');
+    rows.forEach(row => {
+        const keyInput = row.querySelector('input[name="key"]');
+        const valueInput = row.querySelector('input[name="value"]');
+        const temp = keyInput.value;
+        keyInput.value = valueInput.value;
+        valueInput.value = temp;
+    });
+});
+</script></body>
+</html>
