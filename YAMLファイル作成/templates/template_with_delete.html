@@ -6,7 +6,6 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>YAML Generator</title>
 <style>
-        /* Added general styles for a softer look */
         body {
             font-family: Arial, sans-serif;
             padding: 2% 5%;
@@ -28,7 +27,6 @@
             transform: scale(1);
         }
         
-        /* Specific styles for the delete button and the + button */
         .input-row button.delete-row {
             background-color: #FF4C4C;
             margin-left: 10px;
@@ -74,31 +72,30 @@ style>
     #swap-values {
         width: 25px;
         height: 25px;
-        border-radius: 25px;  /* Makes the button rounded */
-        margin-right: 25px;   /* Add some margin for spacing */
+        border-radius: 25px;  
+        margin-right: 25px; 
         color: white;
         cursor: pointer;
     }
 
-    /* ボタンのサイズ調整 */
     #filename-input button {
-        border: none; /* ボーダーを削除 */
-        padding: 0;  /* パディングを削除 */
+        border: none; 
+        padding: 0; 
         display: inline-block;
-        vertical-align: middle; /* 画像とボタンの縦の位置を中央揃え */
+        vertical-align: middle;
     }
 
     /* 画像のサイズ調整 */
     #filename-input img {
         display: block;
-        width: 100%;  /* 画像の幅をボタンの幅に合わせる */
-        height: auto; /* 画像の高さをアスペクト比に合わせて自動調整 */
+        width: 100%;  
+        height: auto; 
     }
     
 </style>
 <style>
     input[type="text"] {
-        height: 40px;  /* Assuming the height of the button is 40px, this can be adjusted */
+        height: 40px;  
         vertical-align: middle;
     }
 </style><style>
@@ -106,18 +103,18 @@ style>
         justify-content: flex-start;
     }
     .input-row input {
-        margin-right: 10px;  /* Adding some margin to space out the input boxes */
+        margin-right: 10px;  
     }
 </style><style>
     input[name="filename"] {
-        font-size: 5px;  /* Adjust the font size of the text inside the filename input box only */
+        font-size: 5px;  
     }
 </style><style>
     label[for="filename"] {
-        font-size: 22px;  /* Adjust the font size of the label "ファイル名:" */
+        font-size: 22px;  
     }
     input[name="filename"] {
-        font-size: 16px;  /* Adjust the font size of the text inside the filename input box */
+        font-size: 16px;  
     }
 </style></head>
 <body>
@@ -150,7 +147,6 @@ style>
 <input style="background-color: #007BFF; color: white;" type="submit" value="YAMLファイルを作成"/>
 </div>
 <script>
-        // Add new input row when '+' button is clicked
         document.getElementById('add-row').addEventListener('click', function() {
             const newRow = document.createElement('div');
             newRow.className = 'input-row';
@@ -165,13 +161,11 @@ style>
     window.scrollTo(0,document.body.scrollHeight);
     
             
-            // Attach event listener to the delete button of the new row
             newRow.querySelector('.delete-row').addEventListener('click', function() {
                 newRow.remove();
             });
         });
         
-        // Attach event listeners to the delete buttons of existing rows
         const deleteButtons = document.querySelectorAll('.delete-row');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -179,9 +173,6 @@ style>
             });
         });
     
-        // Swap values of key and value inputs when the "swap-values" button is clicked
-
-        // Logic to handle the new value
         function updateNewValues() {
             const rows = document.querySelectorAll('.input-row');
             rows.forEach((row, index) => {
@@ -199,10 +190,8 @@ style>
             });
         }
         
-        // Call the update function initially to handle the default row
         updateNewValues();
-        
-        // Update the new values whenever a new row is added or a row is deleted
+
         document.getElementById('add-row').addEventListener('click', updateNewValues);
 
         document.getElementById('swap-values').addEventListener('click', function() {
