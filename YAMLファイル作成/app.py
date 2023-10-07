@@ -10,7 +10,7 @@ yaml_data = {}
 
 def generate_yaml(data):
     """Generate a yaml formatted string from a nested dictionary."""
-    return yaml.dump(data, allow_unicode=True, default_flow_style=False)
+    return yaml.dump(data, allow_unicode=True, default_flow_style=False, sort_keys=False)
 
 def safe_int_conversion(value):
     """Try converting a value to an integer. If fails, return original value."""
